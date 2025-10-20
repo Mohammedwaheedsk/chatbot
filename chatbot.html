@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waheed's Offline Q&A Chatbot</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    .chat-container {
+      width: 90%;
+      max-width: 520px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .chat-header {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 15px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      scroll-behavior: smooth;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .user {
+      background: #2980b9;
+      align-self: flex-end;
+    }
+    .bot {
+      background: #34495e;
+      align-self: flex-start;
+    }
+    .bot img {
+      display: block;
+      margin-top: 8px;
+      max-width: 200px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+    .bot img:hover {
+      transform: scale(1.03);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .input-area {
+      display: flex;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    input {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+    }
+    button {
+      background: #1abc9c;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      padding: 0 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #16a085;
+    }
+    ::placeholder {
+      color: #ddd;
+    }
+    .chat-footer {
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 5px 0;
+      opacity: 0.7;
+    }
+
+    /* 🔍 Fullscreen Image Modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+    }
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    .image-modal span {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">🤖 Waheed's Offline Q&A Bot</div>
+    <div class="chat-box" id="chatBox">
+      <div class="message bot">
+        Hey there! I'm your offline chatbot 💬<br>
+        Ask me something I know, and I’ll show you answers — with a magic typing effect ✨
+      </div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask me anything..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+    <div class="chat-footer">Created with 💙 by Waheed</div>
+  </div>
+
+  <!-- 🖼️ Fullscreen Image Modal -->
+  <div id="imageModal" class="image-modal">
+    <span onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" alt="Expanded View">
+  </div>
+
+  <script>
+    // 💡 Your custom Q&A list (edit as you like)
+    const qaList = {
+      "explain triggers": {
+        text: "A Trigger is a special kind of stored procedure that automatically runs when a certain event occurs in a database, like INSERT, UPDATE, or DELETE.",
+        images: ["trigger1.jpg", "trigger2.jpg"]
+      },
+      "what is ai": {
+        text: "AI stands for Artificial Intelligence — the simulation of human intelligence by machines that can think and learn!",
+        images: ["ai1.jpg"]
+      },
+      "what is cpu": {
+        text: "CPU stands for Central Processing Unit. It’s the brain of your computer that executes commands and calculations.",
+        images: ["cpu.jpg"]
+      },
+      "who created you": {
+        text: "I was lovingly created by Waheed! 👨‍💻",
+        images: ["Waheed.jpg"]
+      },
+      "hello": {
+        text: "Hello there! 🌻 Hope you’re having a wonderful day!",
+        images: []
+      }
+    };
+
+    const fallbackResponses = [
+      "Hmm... I don’t know that yet. Maybe Waheed will teach me soon. 🤔",
+      "That’s a mystery even I can’t solve yet! 🌌",
+      "Sorry, I don’t have that answer yet. 💤"
+    ];
+
+    function sendMessage() {
+      const inputField = document.getElementById("userInput");
+      const userMessage = inputField.value.trim();
+      if (userMessage === "") return;
+
+      addMessage(userMessage, "user");
+      inputField.value = "";
+
+      setTimeout(() => {
+        const question = userMessage.toLowerCase();
+        if (qaList[question]) {
+          typeBotResponse(qaList[question]);
+        } else {
+          const randomReply = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+          addMessage(randomReply, "bot");
+        }
+      }, 400);
+    }
+
+    function typeBotResponse(answerObj) {
+      const chatBox = document.getElementById("chatBox");
+      const botMsg = document.createElement("div");
+      botMsg.classList.add("message", "bot");
+      chatBox.appendChild(botMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      let i = 0;
+      const text = answerObj.text;
+      const typingSpeed = 35;
+
+      function typeNext() {
+        if (i < text.length) {
+          botMsg.innerHTML = text.slice(0, i + 1);
+          i++;
+          chatBox.scrollTop = chatBox.scrollHeight;
+          setTimeout(typeNext, typingSpeed);
+        } else {
+          // After text finishes typing, show images
+          if (answerObj.images && answerObj.images.length > 0) {
+            answerObj.images.forEach(src => {
+              const img = document.createElement("img");
+              img.src = src;
+              img.alt = "Answer Image";
+              img.onclick = () => openModal(src);
+              botMsg.appendChild(img);
+            });
+          }
+        }
+      }
+      typeNext();
+    }
+
+    function addMessage(text, sender) {
+      const chatBox = document.getElementById("chatBox");
+      const message = document.createElement("div");
+      message.classList.add("message", sender);
+      message.textContent = text;
+      chatBox.appendChild(message);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // 🖼️ Fullscreen Image Modal Logic
+    function openModal(src) {
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("modalImage");
+      modal.style.display = "flex";
+      modalImg.src = src;
+    }
+    function closeModal() {
+      document.getElementById("imageModal").style.display = "none";
+    }
+
+    document.getElementById("userInput").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
