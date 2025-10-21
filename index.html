@@ -1,272 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Waheed's ChatBot 💬</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2a5298);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+  }
+
+  .chat-wrapper {
+    width: 90%;
+    max-width: 480px;
+    height: 85vh;
+    background: rgba(255,255,255,0.08);
+    border-radius: 18px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    text-align: center;
+    background: rgba(255,255,255,0.12);
+    padding: 15px;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+  }
+
+  .message {
+    margin: 8px 0;
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    line-height: 1.4;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+  }
+
+  .user {
+    align-self: flex-end;
+    background: #0078ff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bot {
+    align-self: flex-start;
+    background: #3a3a55;
+    border-bottom-left-radius: 4px;
+  }
+
+  .timestamp {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    position: absolute;
+    bottom: -14px;
+    right: 10px;
+  }
+
+  .bot img {
+    display: block;
+    margin-top: 8px;
+    max-width: 200px;
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0;
+    animation: imageFade 0.8s forwards;
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .bot img:hover {
+    transform: scale(1.05);
+  }
+
+  .caption {
+    font-size: 0.75rem;
+    text-align: center;
+    opacity: 0.7;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .input-area {
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.25);
+  }
+
+  input {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  button {
+    background: #00d4ff;
+    border: none;
+    padding: 0 18px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover { background: #00bcd4; }
+
+  .chat-footer {
+    text-align: center;
+    padding: 8px 0;
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes imageFade {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Image Modal */
+  .image-modal {
+    display: none;
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+  .image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  }
+  .image-modal span {
+    position: absolute;
+    top: 20px; right: 30px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
+</head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Waheed's Offline Q&A Chatbot</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #2c3e50, #3498db);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
-    }
-    .chat-container {
-      width: 90%;
-      max-width: 520px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
-    .chat-header {
-      background: rgba(0, 0, 0, 0.25);
-      padding: 15px;
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-    .chat-box {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      scroll-behavior: smooth;
-    }
-    .message {
-      margin: 8px 0;
-      padding: 10px 14px;
-      border-radius: 12px;
-      max-width: 80%;
-      word-wrap: break-word;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    .user {
-      background: #2980b9;
-      align-self: flex-end;
-    }
-    .bot {
-      background: #34495e;
-      align-self: flex-start;
-    }
-    .bot img {
-      display: block;
-      margin-top: 8px;
-      max-width: 200px;
-      border-radius: 8px;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      transition: transform 0.2s ease-in-out;
-    }
-    .bot img:hover {
-      transform: scale(1.03);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .input-area {
-      display: flex;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    input {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 1rem;
-    }
-    button {
-      background: #1abc9c;
-      border: none;
-      color: #fff;
-      font-weight: bold;
-      padding: 0 20px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #16a085;
-    }
-    ::placeholder {
-      color: #ddd;
-    }
-    .chat-footer {
-      text-align: center;
-      font-size: 0.8rem;
-      padding: 5px 0;
-      opacity: 0.7;
-    }
+  <title>Waheed's ChatBot 💬</title>
 
-    /* 🔍 Fullscreen Image Modal */
-    .image-modal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      justify-content: center;
-      align-items: center;
-    }
-    .image-modal img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-    .image-modal span {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      color: white;
-      font-size: 2rem;
-      cursor: pointer;
-      user-select: none;
-    }
+  <!-- Favicon for browsers -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+
+  <!-- Apple iPhone/iPad Home Screen Icon -->
+  <link rel="apple-touch-icon" href="icon-512.png" />
+
+  <!-- Android PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Theme color for address bar -->
+  <meta name="theme-color" content="#1e1e2f">
+
+  <style>
+    /* your entire CSS here (unchanged) */
   </style>
 </head>
-<body>
-  <div class="chat-container">
-    <div class="chat-header">🤖 Waheed's Offline Q&A Bot</div>
-    <div class="chat-box" id="chatBox">
-      <div class="message bot">
-        Hey there! I'm your offline chatbot 💬<br>
-        Ask me something I know, and I’ll show you answers — with a magic typing effect ✨
-      </div>
-    </div>
-    <div class="input-area">
-      <input type="text" id="userInput" placeholder="Ask me anything..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-    <div class="chat-footer">Created with 💙 by Waheed</div>
-  </div>
 
-  <!-- 🖼️ Fullscreen Image Modal -->
-  <div id="imageModal" class="image-modal">
-    <span onclick="closeModal()">&times;</span>
-    <img id="modalImage" src="" alt="Expanded View">
-  </div>
 
-  <script>
-    // 💡 Your custom Q&A list (edit as you like)
-    const qaList = {
-      "explain triggers": {
-        text: "A Trigger is a special kind of stored procedure that automatically runs when a certain event occurs in a database, like INSERT, UPDATE, or DELETE.",
-        images: ["trigger1.jpg", "trigger2.jpg"]
-      },
-      "what is ai": {
-        text: "AI stands for Artificial Intelligence — the simulation of human intelligence by machines that can think and learn!",
-        images: ["ai1.jpg"]
-      },
-      "what is cpu": {
-        text: "CPU stands for Central Processing Unit. It’s the brain of your computer that executes commands and calculations.",
-        images: ["cpu.jpg"]
-      },
-      "who created you": {
-        text: "I was lovingly created by Waheed! 👨‍💻",
-        images: ["Waheed.jpg"]
-      },
-      "hello": {
-        text: "Hello there! 🌻 Hope you’re having a wonderful day!",
-        images: []
+<script>
+  // Q&A Database with image captions
+  const qaSet = [
+    {
+      aliases: ["triggers", "database triggers", "sql trigger", "trigger in db", "trigger"],
+      answer: {
+        text: "A Trigger is a special stored procedure that automatically runs when an event like INSERT, UPDATE, or DELETE happens in a database. Here is the answer for Triggers ↡↡",
+        images: [
+          { src: "trigger1.jpg",  caption: "1" },
+          { src: "trigger2.jpg",  caption: "2" },
+          { src: "trigger3.jpg",  caption: "3"  },
+          { src: "trigger4.jpg",  caption: "4"  },
+        ]
       }
-    };
-
-    const fallbackResponses = [
-      "Hmm... I don’t know that yet. Maybe Waheed will teach me soon. 🤔",
-      "That’s a mystery even I can’t solve yet! 🌌",
-      "Sorry, I don’t have that answer yet. 💤"
-    ];
-
-    function sendMessage() {
-      const inputField = document.getElementById("userInput");
-      const userMessage = inputField.value.trim();
-      if (userMessage === "") return;
-
-      addMessage(userMessage, "user");
-      inputField.value = "";
-
-      setTimeout(() => {
-        const question = userMessage.toLowerCase();
-        if (qaList[question]) {
-          typeBotResponse(qaList[question]);
-        } else {
-          const randomReply = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-          addMessage(randomReply, "bot");
-        }
-      }, 400);
-    }
-
-    function typeBotResponse(answerObj) {
-      const chatBox = document.getElementById("chatBox");
-      const botMsg = document.createElement("div");
-      botMsg.classList.add("message", "bot");
-      chatBox.appendChild(botMsg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      let i = 0;
-      const text = answerObj.text;
-      const typingSpeed = 35;
-
-      function typeNext() {
-        if (i < text.length) {
-          botMsg.innerHTML = text.slice(0, i + 1);
-          i++;
-          chatBox.scrollTop = chatBox.scrollHeight;
-          setTimeout(typeNext, typingSpeed);
-        } else {
-          // After text finishes typing, show images
-          if (answerObj.images && answerObj.images.length > 0) {
-            answerObj.images.forEach(src => {
-              const img = document.createElement("img");
-              img.src = src;
-              img.alt = "Answer Image";
-              img.onclick = () => openModal(src);
-              botMsg.appendChild(img);
-            });
-          }
-        }
+    },
+    {
+      aliases: ["cursors", "database cursors", "sql cursor", "cursor in db", "Explain cursors"],
+      answer: {
+        text: "•  Cursors are a temporary work area created in the system memory when a SQL statement is executed. Below is the full answer for Cursors",
+        images: [
+          { src: "cursor1.jpg",  caption: "1" },
+          { src: "cursor2.jpg",  caption: "2" },
+          { src: "cursor3.jpg",  caption: "3"  },
+        ]
       }
-      typeNext();
-    }
+    },
+    {
+      aliases: ["dbms package", "package in dbms", "packages", "Explain packages", "dbms packages", "package"],
+      answer: {
+        text: "Hmmmmmmmm...... Packages? 🤔🤔. See the answer below for Packages",
+        images: [
+          { src: "package1.jpg",  caption: "1" },
+          { src: "package2.jpg",  caption: "2" }
+        ]
+      }
+    },
+    {
+      aliases: ["conditional statements", "sql conditional statements", "conditions","if else statements", "if else statement","if statements", "if statement","condition statements","condition"],
+      answer: {
+        text: "Condition statements are the statements which are ___________...... See the answer below.",
+        images: [
+          { src: "condition1.jpg",  caption: "1" },
+          { src: "condition2.jpg",  caption: "2" },
+          { src: "condition3.jpg",  caption: "3"  },
 
-    function addMessage(text, sender) {
-      const chatBox = document.getElementById("chatBox");
-      const message = document.createElement("div");
-      message.classList.add("message", sender);
-      message.textContent = text;
-      chatBox.appendChild(message);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+        ]
+      }
+    },
+    {
+      aliases: ["exception handling statements", "exception", "handling statements", "sql exceptions", "exceptions", "exception handling"],
+      answer: {
+        text: "See the answer below for better understanding...",
+        images: [
+          { src: "exception1.jpg",  caption: "1" },
+          { src: "exception2.jpg",  caption: "2" },
+          { src: "exception3.jpg",  caption: "3"  },
 
-    // 🖼️ Fullscreen Image Modal Logic
-    function openModal(src) {
-      const modal = document.getElementById("imageModal");
-      const modalImg = document.getElementById("modalImage");
-      modal.style.display = "flex";
-      modalImg.src = src;
-    }
-    function closeModal() {
-      document.getElementById("imageModal").style.display = "none";
-    }
+        ]
+      }
+    },
+    {
+      aliases: ["looping", "loop", "looping statements", "sql looping statements", "for loop", "while loop", "simple loop"],
+      answer: {
+        text: "Just repeting the statement until the condition is TRUE. See below for material answer with flowcharts.",
+        images: [
+          { src: "loop1.jpg",  caption: "1" },
+          { src: "loop2.jpg",  caption: "2" },
+          { src: "loop3.jpg",  caption: "3"  },
+          { src: "loop4.jpg",  caption: "4"  },
+          { src: "loop5.jpg",  caption: "5"  },
+        ]
+      }
+    },
+    {
+      aliases: ["structure of pl sql", "pl sql structure", "pl sql", "structure", "features of pl sql", "pl sql features", "advantages of pl sql", "pl sql advantages", "features", "advantages"],
+      answer: {
+        text: "Here's the answer for Structure of PL/SQL",
+        images: [
+          { src: "strpl1.jpg",  caption: "1" },
+          { src: "strpl2.jpg",  caption: "2" },
+          { src: "strpl3.jpg",  caption: "3"  },    
+          { src: "strpl4.jpg",  caption: "4"  }
 
-    document.getElementById("userInput").addEventListener("keypress", function (e) {
-      if (e.key === "Enter") sendMessage();
-    });
-  </script>
+        ]
+      }
+    },
+    {
+        aliases: ["normalization", "normalisation", "normal forms", "normal", "1nf", "2nf", "3nf", "4nf", "5nf", "bcnf"],
+        answer: {
+          text: "Ohhhhh.... This is tooo big, understanding is hard but here's the answer for Normalization",
+            images: [
+              { src: "norm1.jpg",  caption: "1" },
+              { src: "norm2.jpg",  caption: "2" },
+              { src: "norm3.jpg",  caption: "3"  },
+              { src: "norm4.jpg",  caption: "4"  },
+              { src: "norm5.jpg",  caption: "5"  },
+              { src: "norm6.jpg",  caption: "6"  },
+              { src: "norm7.jpg",  caption: "7"  },
+              { src: "norm8.jpg",  caption: "8"  },
+              { src: "norm9.jpg",  caption: "9"  },
+              { src: "norm10.jpg",  caption: "10"  },
+              { src: "norm11.jpg",  caption: "11"  },
+        ]
+      } 
+    },
+    {
+      aliases: ["relational algebra", "algebra",],
+      answer: {
+        text: "See the answer below for better understanding...",
+        images: [
+            {scr: "ralge1.jpg", caption: "1"},
+            {scr: "ralge2.jpg", caption: "2"},
+            {scr: "ralge3.jpg", caption: "3"},
+            {scr: "ralge4.jpg", caption: "4"},
+      ]
+      }      
+    },
+    {
+      aliases: ["relational calculus", "calculus"],
+      answer: {
+        text: "See the answer below for better understanding...",
+        images: [
+            {scr: "rcal1.jpg", caption: "1"},
+            {scr: "rcal2.jpg", caption: "2"},
+            {scr: "rcal3.jpg", caption: "3"},
+      ]
+      }
+    },
+    {
+        aliases
+    }
+  ];
+
+  const fallbackResponses = [
+    "Hmm... I don’t know that yet. Maybe Waheed will teach me soon. 🤔",
+    "That’s a mystery even I can’t solve yet! 🌌",
+    "Sorry, I don’t have that answer yet. 💤"
+  ];
+
+  function getAnswer(query) {
+    const normalized = query.trim().toLowerCase();
+    return qaSet.find(qa => qa.aliases.some(a => normalized.includes(a)))?.answer || null;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage(text, "user");
+    input.value = "";
+
+    setTimeout(() => {
+      const ans = getAnswer(text);
+      if (ans) typeBotResponse(ans);
+      else addMessage(fallbackResponses[Math.floor(Math.random()*fallbackResponses.length)], "bot");
+    }, 400);
+  }
+
+  function typeBotResponse(answerObj) {
+    const chatBox = document.getElementById("chatBox");
+    const botMsg = document.createElement("div");
+    botMsg.classList.add("message", "bot");
+    chatBox.appendChild(botMsg);
+    let i = 0;
+    const text = answerObj.text;
+    const speed = 30;
+
+    function typeChar() {
+      if (i < text.length) {
+        botMsg.textContent = text.slice(0, i + 1);
+        i++;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        setTimeout(typeChar, speed);
+      } else {
+        if (answerObj.images && answerObj.images.length) {
+          answerObj.images.forEach(({ src, caption }) => {
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = "Answer image";
+            img.onclick = () => openModal(src);
+            const captionEl = document.createElement("div");
+            captionEl.classList.add("caption");
+            captionEl.textContent = caption || "";
+            botMsg.appendChild(img);
+            botMsg.appendChild(captionEl);
+          });
+        }
+        appendTimestamp(botMsg);
+      }
+    }
+    typeChar();
+  }
+
+  function addMessage(text, sender) {
+    const chatBox = document.getElementById("chatBox");
+    const msg = document.createElement("div");
+    msg.classList.add("message", sender);
+    msg.textContent = text;
+    appendTimestamp(msg);
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function appendTimestamp(el) {
+    const time = document.createElement("div");
+    time.classList.add("timestamp");
+    const now = new Date();
+    time.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    el.appendChild(time);
+  }
+
+  function openModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    modal.style.display = "flex";
+    modalImg.src = src;
+  }
+
+  function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+  }
+
+  document.getElementById("userInput").addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
 </body>
 </html>
