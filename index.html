@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Waheed's ChatBot 💬</title>
+<title>BCA's ChatBot 💬</title>
+
+<!-- Favicon and PWA -->
+<link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1e1e2f">
+
 <style>
   * { box-sizing: border-box; }
 
@@ -175,253 +182,339 @@
   }
 </style>
 </head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Waheed's ChatBot 💬</title>
+<body>
 
-  <!-- Favicon for browsers -->
-  <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+  <div class="chat-wrapper">
+    <div class="chat-header">💬 BCA's ChatBot</div>
+    <div class="chat-box" id="chatBox"></div>
 
-  <!-- Apple iPhone/iPad Home Screen Icon -->
-  <link rel="apple-touch-icon" href="icon-512.png" />
+    <div class="input-area">
+      <input id="userInput" type="text" placeholder="Type your question..." autocomplete="off" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
 
-  <!-- Android PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
+    <div class="chat-footer">✨ Made by Waheed ✨</div>
+  </div>
 
-  <!-- Theme color for address bar -->
-  <meta name="theme-color" content="#1e1e2f">
-
-  <style>
-    /* your entire CSS here (unchanged) */
-  </style>
-</head>
-
+  <!-- Image Modal -->
+  <div id="imageModal" class="image-modal">
+    <span onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" alt="Expanded Image">
+  </div>
 
 <script>
-  // Q&A Database with image captions
-  const qaSet = [
-    {
-      aliases: ["triggers", "database triggers", "sql trigger", "trigger in db", "trigger"],
-      answer: {
-        text: "A Trigger is a special stored procedure that automatically runs when an event like INSERT, UPDATE, or DELETE happens in a database. Here is the answer for Triggers ↡↡",
-        images: [
-          { src: "trigger1.jpg",  caption: "1" },
-          { src: "trigger2.jpg",  caption: "2" },
-          { src: "trigger3.jpg",  caption: "3"  },
-          { src: "trigger4.jpg",  caption: "4"  },
-        ]
-      }
-    },
-    {
-      aliases: ["cursors", "database cursors", "sql cursor", "cursor in db", "Explain cursors"],
-      answer: {
-        text: "•  Cursors are a temporary work area created in the system memory when a SQL statement is executed. Below is the full answer for Cursors",
-        images: [
-          { src: "cursor1.jpg",  caption: "1" },
-          { src: "cursor2.jpg",  caption: "2" },
-          { src: "cursor3.jpg",  caption: "3"  },
-        ]
-      }
-    },
-    {
-      aliases: ["dbms package", "package in dbms", "packages", "Explain packages", "dbms packages", "package"],
-      answer: {
-        text: "Hmmmmmmmm...... Packages? 🤔🤔. See the answer below for Packages",
-        images: [
-          { src: "package1.jpg",  caption: "1" },
-          { src: "package2.jpg",  caption: "2" }
-        ]
-      }
-    },
-    {
-      aliases: ["conditional statements", "sql conditional statements", "conditions","if else statements", "if else statement","if statements", "if statement","condition statements","condition"],
-      answer: {
-        text: "Condition statements are the statements which are ___________...... See the answer below.",
-        images: [
-          { src: "condition1.jpg",  caption: "1" },
-          { src: "condition2.jpg",  caption: "2" },
-          { src: "condition3.jpg",  caption: "3"  },
-
-        ]
-      }
-    },
-    {
-      aliases: ["exception handling statements", "exception", "handling statements", "sql exceptions", "exceptions", "exception handling"],
-      answer: {
-        text: "See the answer below for better understanding...",
-        images: [
-          { src: "exception1.jpg",  caption: "1" },
-          { src: "exception2.jpg",  caption: "2" },
-          { src: "exception3.jpg",  caption: "3"  },
-
-        ]
-      }
-    },
-    {
-      aliases: ["looping", "loop", "looping statements", "sql looping statements", "for loop", "while loop", "simple loop"],
-      answer: {
-        text: "Just repeting the statement until the condition is TRUE. See below for material answer with flowcharts.",
-        images: [
-          { src: "loop1.jpg",  caption: "1" },
-          { src: "loop2.jpg",  caption: "2" },
-          { src: "loop3.jpg",  caption: "3"  },
-          { src: "loop4.jpg",  caption: "4"  },
-          { src: "loop5.jpg",  caption: "5"  },
-        ]
-      }
-    },
-    {
-      aliases: ["structure of pl sql", "pl sql structure", "pl sql", "structure", "features of pl sql", "pl sql features", "advantages of pl sql", "pl sql advantages", "features", "advantages"],
-      answer: {
-        text: "Here's the answer for Structure of PL/SQL",
-        images: [
-          { src: "strpl1.jpg",  caption: "1" },
-          { src: "strpl2.jpg",  caption: "2" },
-          { src: "strpl3.jpg",  caption: "3"  },    
-          { src: "strpl4.jpg",  caption: "4"  }
-
-        ]
-      }
-    },
-    {
-        aliases: ["normalization", "normalisation", "normal forms", "normal", "1nf", "2nf", "3nf", "4nf", "5nf", "bcnf"],
-        answer: {
-          text: "Ohhhhh.... This is tooo big, understanding is hard but here's the answer for Normalization",
-            images: [
-              { src: "norm1.jpg",  caption: "1" },
-              { src: "norm2.jpg",  caption: "2" },
-              { src: "norm3.jpg",  caption: "3"  },
-              { src: "norm4.jpg",  caption: "4"  },
-              { src: "norm5.jpg",  caption: "5"  },
-              { src: "norm6.jpg",  caption: "6"  },
-              { src: "norm7.jpg",  caption: "7"  },
-              { src: "norm8.jpg",  caption: "8"  },
-              { src: "norm9.jpg",  caption: "9"  },
-              { src: "norm10.jpg",  caption: "10"  },
-              { src: "norm11.jpg",  caption: "11"  },
-        ]
-      } 
-    },
-    {
-      aliases: ["relational algebra", "algebra",],
-      answer: {
-        text: "See the answer below for better understanding...",
-        images: [
-            {scr: "ralge1.jpg", caption: "1"},
-            {scr: "ralge2.jpg", caption: "2"},
-            {scr: "ralge3.jpg", caption: "3"},
-            {scr: "ralge4.jpg", caption: "4"},
+const qaSet = [
+  {
+    aliases: ["triggers", "database triggers", "sql trigger", "trigger in db", "trigger"],
+    answer: {
+      text: "A Trigger is a special stored procedure that automatically runs when an event like INSERT, UPDATE, or DELETE happens in a database. Here is the answer for Triggers ↡↡",
+      images: [
+        { src: "trigger1.jpg", caption: "1" },
+        { src: "trigger2.jpg", caption: "2" }
       ]
-      }      
-    },
-    {
-      aliases: ["relational calculus", "calculus"],
-      answer: {
-        text: "See the answer below for better understanding...",
-        images: [
-            {scr: "rcal1.jpg", caption: "1"},
-            {scr: "rcal2.jpg", caption: "2"},
-            {scr: "rcal3.jpg", caption: "3"},
+    }
+  },
+  {
+    aliases: ["cursors", "database cursors", "sql cursor", "cursor in db", "explain cursors"],
+    answer: {
+      text: "• Cursors are a temporary work area created in the system memory when a SQL statement is executed. Below is the full answer for Cursors",
+      images: [
+        { src: "cursor1.jpg", caption: "1" },
+        { src: "cursor2.jpg", caption: "2" },
+        { src: "cursor3.jpg", caption: "3" }
       ]
-      }
-    },
-    {
-        aliases
     }
-  ];
-
-  const fallbackResponses = [
-    "Hmm... I don’t know that yet. Maybe Waheed will teach me soon. 🤔",
-    "That’s a mystery even I can’t solve yet! 🌌",
-    "Sorry, I don’t have that answer yet. 💤"
-  ];
-
-  function getAnswer(query) {
-    const normalized = query.trim().toLowerCase();
-    return qaSet.find(qa => qa.aliases.some(a => normalized.includes(a)))?.answer || null;
-  }
-
-  function sendMessage() {
-    const input = document.getElementById("userInput");
-    const text = input.value.trim();
-    if (!text) return;
-    addMessage(text, "user");
-    input.value = "";
-
-    setTimeout(() => {
-      const ans = getAnswer(text);
-      if (ans) typeBotResponse(ans);
-      else addMessage(fallbackResponses[Math.floor(Math.random()*fallbackResponses.length)], "bot");
-    }, 400);
-  }
-
-  function typeBotResponse(answerObj) {
-    const chatBox = document.getElementById("chatBox");
-    const botMsg = document.createElement("div");
-    botMsg.classList.add("message", "bot");
-    chatBox.appendChild(botMsg);
-    let i = 0;
-    const text = answerObj.text;
-    const speed = 30;
-
-    function typeChar() {
-      if (i < text.length) {
-        botMsg.textContent = text.slice(0, i + 1);
-        i++;
-        chatBox.scrollTop = chatBox.scrollHeight;
-        setTimeout(typeChar, speed);
-      } else {
-        if (answerObj.images && answerObj.images.length) {
-          answerObj.images.forEach(({ src, caption }) => {
-            const img = document.createElement("img");
-            img.src = src;
-            img.alt = "Answer image";
-            img.onclick = () => openModal(src);
-            const captionEl = document.createElement("div");
-            captionEl.classList.add("caption");
-            captionEl.textContent = caption || "";
-            botMsg.appendChild(img);
-            botMsg.appendChild(captionEl);
-          });
-        }
-        appendTimestamp(botMsg);
-      }
+  },
+  {
+    aliases: ["dbms package", "package in dbms", "packages", "explain packages", "dbms packages", "package"],
+    answer: {
+      text: "Hmmmmmmmm...... Packages? 🤔🤔. See the answer below for Packages",
+      images: [
+        { src: "package1.jpg", caption: "1" },
+        { src: "package2.jpg", caption: "2" }
+      ]
     }
-    typeChar();
+  },
+  {
+    aliases: ["conditional statements", "sql conditional statements", "conditions", "if else statements", "if else statement", "if statements", "if statement", "condition statements", "condition"],
+    answer: {
+      text: "Condition statements are the statements which are ___________...... See the answer below.",
+      images: [
+        { src: "condition1.jpg", caption: "1" },
+        { src: "condition2.jpg", caption: "2" },
+        { src: "condition3.jpg", caption: "3" }
+      ]
+    }
+  },
+  {
+    aliases: ["exception handling statements", "exception", "handling statements", "sql exceptions", "exceptions", "exception handling"],
+    answer: {
+      text: "See the answer below for better understanding...",
+      images: [
+        { src: "exception1.jpg", caption: "1" },
+        { src: "exception2.jpg", caption: "2" },
+        { src: "exception3.jpg", caption: "3" }
+      ]
+    }
+  },
+  {
+    aliases: ["looping", "loop", "looping statements", "sql looping statements", "for loop", "while loop", "simple loop"],
+    answer: {
+      text: "Just repeating the statement until the condition is TRUE. See below for material answer with flowcharts.",
+      images: [
+        { src: "loop1.jpg", caption: "1" },
+        { src: "loop2.jpg", caption: "2" },
+        { src: "loop3.jpg", caption: "3" },
+        { src: "loop4.jpg", caption: "4" },
+        { src: "loop5.jpg", caption: "5" }
+      ]
+    }
+  },
+  {
+    aliases: ["structure of pl sql", "pl sql structure", "pl sql", "structure", "features of pl sql", "pl sql features", "advantages of pl sql", "pl sql advantages", "features", "advantages"],
+    answer: {
+      text: "Here's the answer for Structure of PL/SQL",
+      images: [
+        { src: "strpl1.jpg", caption: "1" },
+        { src: "strpl2.jpg", caption: "2" },
+        { src: "strpl3.jpg", caption: "3" },
+        { src: "strpl4.jpg", caption: "4" }
+      ]
+    }
+  },
+  {
+    aliases: ["normalization", "normalisation", "normal forms", "normal", "1nf", "2nf", "3nf", "4nf", "5nf", "bcnf"],
+    answer: {
+      text: "Ohhhhh.... This is tooo big, understanding is hard but here's the answer for Normalization",
+      images: [
+        { src: "norm1.jpg", caption: "1" },
+        { src: "norm2.jpg", caption: "2" },
+        { src: "norm3.jpg", caption: "3" },
+        { src: "norm4.jpg", caption: "4" },
+        { src: "norm5.jpg", caption: "5" },
+        { src: "norm6.jpg", caption: "6" },
+        { src: "norm7.jpg", caption: "7" },
+        { src: "norm8.jpg", caption: "8" },
+        { src: "norm9.jpg", caption: "9" },
+        { src: "norm10.jpg", caption: "10" },
+        { src: "norm11.jpg", caption: "11" }
+      ]
+    }
+  },
+  {
+    aliases: ["relational algebra", "algebra"],
+    answer: {
+      text: "See the answer below for better understanding...",
+      images: [
+        { src: "ralge1.jpg", caption: "1" },
+        { src: "ralge2.jpg", caption: "2" },
+        { src: "ralge3.jpg", caption: "3" },
+        { src: "ralge4.jpg", caption: "4" }
+      ]
+    }
+  },
+  {
+    aliases: ["relational calculus", "calculus"],
+    answer: {
+      text: "See the answer for calculus below for better understanding...",
+      images: [
+        { src: "rcal1.jpg", caption: "1" },
+        { src: "rcal2.jpg", caption: "2" },
+        { src: "rcal3.jpg", caption: "3" }
+      ]
+    }
+  },
+  {
+    aliases: ["codd rules", "cod rules", "rules of codd", "codd"],
+    answer: {
+        text: "The below is the answer for Codd Rules...",
+        images: [
+          { src: "codd1.jpg", caption: "1" },
+          { src: "codd2.jpg", caption: "2" },
+          { src: "codd3.jpg", caption: "3" },
+          { src: "codd4.jpg", caption: "4" },
+    ]
+    }
+  },
+  {
+    aliases: ["views:","virtual tables","views or virtual tables", "view", "virtual table", "view or virtual table"],
+    answer: {
+        text: "The below is the answer for Views...",
+        images: [
+          { src: "vvt1.jpg", caption: "1" },
+          { src: "vvt2.jpg", caption: "2" },
+          { src: "vvt3.jpg", caption: "3" },
+          { src: "vvt4.jpg", caption: "4" },
+          { src: "vvt5.jpg", caption: "5" },
+    ]
   }
-
-  function addMessage(text, sender) {
-    const chatBox = document.getElementById("chatBox");
-    const msg = document.createElement("div");
-    msg.classList.add("message", sender);
-    msg.textContent = text;
-    appendTimestamp(msg);
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
+  },
+  {
+    aliases: ["dcl", "dcl commands", "dcl command", "data control language"],
+    answer: {
+        text: "The below is the answer for DCL...",
+        images: [
+          { src: "dcl1.jpg", caption: "1" },
+          { src: "dcl2.jpg", caption: "2" },
+          { src: "dcl3.jpg", caption: "3" },
+    ]
+}
+  },
+  {
+    aliases: ["tcl", "tcl commands", "tcl command", "transaction control language",],
+    answer: {
+        text: "The below is the answer for TCL...",
+        images: [
+          { src: "tcl1.jpg", caption: "1" },
+          { src: "tcl2.jpg", caption: "2" },
+          { src: "tcl3.jpg", caption: "3" },
+    ]
+}
+  },
+  {
+    aliases: ["dml operations", "dml operation", "dml"],
+    answer: {
+        text: "The below is the answer for DML...",
+        images: [
+          { src: "dmlo1.jpg", caption: "1" },
+          { src: "dmlo2.jpg", caption: "2" },
+          { src: "dmlo3.jpg", caption: "3" },
+          { src: "dmlo4.jpg", caption: "4" },
+    ]
+    }
+  },
+  {
+    aliases: ["join", "joins","inner join", "outer join", "inner joins", "outer joins", "equi join","non equi join"],
+    answer: {
+        text: "The below is the answer for Joins...",
+        images: [
+          { src: "joins1.jpg", caption: "1" },
+          { src: "joins2.jpg", caption: "2" },
+          { src: "joins3.jpg", caption: "3" },
+          { src: "joins4.jpg", caption: "4" },
+          { src: "joins5.jpg", caption: "5" },
+          { src: "joins6.jpg", caption: "6" },
+          { src: "joins7.jpg", caption: "7" },
+    ]
+    }
+  },
+  {
+    aliases: ["hi", "hello", "hey", "hi there", "hello there", "hey there"],
+    answer: {
+      text: "Hello there, It's good to see you here!",
+      images: [
+        { src: "hi1.mp4", caption: "Helloooo!!" }
+      ]
+    }
   }
+];
 
-  function appendTimestamp(el) {
-    const time = document.createElement("div");
-    time.classList.add("timestamp");
-    const now = new Date();
-    time.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    el.appendChild(time);
+const fallbackResponses = [
+  "Hmm... I don’t know that yet. Maybe Waheed will teach me soon. 🤔",
+  "That’s a mystery even I can’t solve yet! 🌌",
+  "Sorry, I don’t have that answer yet. 💤"
+];
+
+function getAnswer(query) {
+  const normalized = query.trim().toLowerCase();
+  return qaSet.find(qa => qa.aliases.some(a => normalized.includes(a)))?.answer || null;
+}
+
+function sendMessage() {
+  const input = document.getElementById("userInput");
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, "user");
+  input.value = "";
+
+  setTimeout(() => {
+    const ans = getAnswer(text);
+    if (ans) typeBotResponse(ans);
+    else addMessage(fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)], "bot");
+  }, 400);
+}
+
+function typeBotResponse(answerObj) {
+  const chatBox = document.getElementById("chatBox");
+  const botMsg = document.createElement("div");
+  botMsg.classList.add("message", "bot");
+  chatBox.appendChild(botMsg);
+
+  let i = 0;
+  const text = answerObj.text;
+  const speed = 30;
+
+  function typeChar() {
+    if (i < text.length) {
+      botMsg.textContent = text.slice(0, i + 1);
+      i++;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      setTimeout(typeChar, speed);
+    } else {
+      // ✅ Show images or videos after typing
+      if (answerObj.images && answerObj.images.length) {
+        answerObj.images.forEach(({ src, caption }) => {
+          if (!src) return;
+          let mediaEl;
+          if (src.endsWith(".mp4")) {
+            mediaEl = document.createElement("video");
+            mediaEl.src = src;
+            mediaEl.controls = true;
+            mediaEl.autoplay = true;
+            mediaEl.muted = true;
+            mediaEl.loop = true;
+          } else {
+            mediaEl = document.createElement("img");
+            mediaEl.src = src;
+            mediaEl.alt = "Answer image";
+            mediaEl.onclick = () => openModal(src);
+          }
+          const captionEl = document.createElement("div");
+          captionEl.classList.add("caption");
+          captionEl.textContent = caption || "";
+          botMsg.appendChild(mediaEl);
+          botMsg.appendChild(captionEl);
+        });
+      }
+      appendTimestamp(botMsg);
+    }
   }
+  typeChar();
+}
 
-  function openModal(src) {
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
-    modal.style.display = "flex";
-    modalImg.src = src;
-  }
+function addMessage(text, sender) {
+  const chatBox = document.getElementById("chatBox");
+  const msg = document.createElement("div");
+  msg.classList.add("message", sender);
+  msg.textContent = text;
+  appendTimestamp(msg);
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-  function closeModal() {
-    document.getElementById("imageModal").style.display = "none";
-  }
+function appendTimestamp(el) {
+  const time = document.createElement("div");
+  time.classList.add("timestamp");
+  const now = new Date();
+  time.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  el.appendChild(time);
+}
 
-  document.getElementById("userInput").addEventListener("keypress", e => {
-    if (e.key === "Enter") sendMessage();
-  });
+function openModal(src) {
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImage");
+  modal.style.display = "flex";
+  modalImg.src = src;
+}
+
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none";
+}
+
+document.getElementById("userInput").addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage();
+});
 </script>
+
 </body>
 </html>
